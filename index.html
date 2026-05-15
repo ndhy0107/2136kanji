@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Kanji - Click để xem ảnh</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        /* Grid hiển thị các chữ Hán */
+        .kanji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .kanji-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .kanji-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+        
+        .kanji-char {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .kanji-meaning {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* Modal popup cho ảnh */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            text-align: center;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .close:hover {
+            color: #333;
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .modal-kanji {
+            font-size: 64px;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #dc3545;
+            padding: 20px;
+            font-size: 16px;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .search-box:focus {
+            border-color: #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            .kanji-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .kanji-char {
+                font-size: 36px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Học Kanji qua hình ảnh</h1>
+        <p class="subtitle">✨ Click vào bất kỳ chữ Hán nào để xem hình ảnh minh họa</p>
+        
+        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Tìm kiếm chữ Hán...">
+        
+        <div class="kanji-grid" id="kanjiGrid"></div>
+    </div>
+    
+    <!-- Modal popup -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalContent">
+                <div class="modal-kanji" id="modalKanji"></div>
+                <div id="modalImageContainer">
+                    <div class="loading"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Dữ liệu từ vựng (bạn có thể import từ file Excel đã xuất)
+        // Định dạng: { kanji: "感", meaning: "cảm giác" }
+        const vocabulary = [
+            // THÊM DỮ LIỆU CỦA BẠN VÀO ĐÂY
+            // Ví dụ:
+            { kanji: "感", meaning: "cảm giác" },
+            { kanji: "食", meaning: "ăn" },
+            { kanji: "飲", meaning: "uống" },
+            { kanji: "行", meaning: "đi" },
+            // ... thêm các chữ khác từ file Excel của bạn
+        ];
+        
+        // Cấu hình GitHub repo của bạn
+        // THAY ĐỔI URL NÀY THÀNH REPO CỦA BẠN
+        const GITHUB_REPO = "https://raw.githubusercontent.com/ndhy0107/2136kanji/main";
+        const IMAGE_FOLDER = "/images"; // Thư mục chứa ảnh trong repo
+        
+        // Cache ảnh để tránh tải lại nhiều lần
+        const imageCache = new Map();
+        
+        // Hiển thị danh sách chữ Hán
+        function displayKanjiList(searchTerm = "") {
+            const grid = document.getElementById("kanjiGrid");
+            grid.innerHTML = "";
+            
+            const filteredVocab = vocabulary.filter(item => 
+                item.kanji.includes(searchTerm) || 
+                item.meaning.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            if (filteredVocab.length === 0) {
+                grid.innerHTML = "<p style='grid-column: 1/-1; text-align: center;'>Không tìm thấy chữ Hán nào</p>";
+                return;
+            }
+            
+            filteredVocab.forEach(item => {
+                const card = document.createElement("div");
+                card.className = "kanji-card";
+                card.onclick = () => showImage(item.kanji);
+                card.innerHTML = `
+                    <div class="kanji-char">${item.kanji}</div>
+                    <div class="kanji-meaning">${item.meaning}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        // Hiển thị ảnh trong modal
+        async function showImage(kanji) {
+            const modal = document.getElementById("imageModal");
+            const modalKanji = document.getElementById("modalKanji");
+            const modalImageContainer = document.getElementById("modalImageContainer");
+            
+            modalKanji.textContent = kanji;
+            modalImageContainer.innerHTML = '<div class="loading"></div>';
+            modal.style.display = "block";
+            
+            // Tìm file ảnh (thử với các định dạng khác nhau)
+            const extensions = ['.jpg', '.png', '.jpeg', '.gif'];
+            let imageUrl = null;
+            
+            for (const ext of extensions) {
+                const url = `${GITHUB_REPO}${IMAGE_FOLDER}/${kanji}${ext}`;
+                
+                // Kiểm tra cache
+                if (imageCache.has(url)) {
+                    imageUrl = url;
+                    break;
+                }
+                
+                // Kiểm tra file có tồn tại không
+                try {
+                    const response = await fetch(url, { method: 'HEAD' });
+                    if (response.ok) {
+                        imageUrl = url;
+                        imageCache.set(url, true);
+                        break;
+                    }
+                } catch (error) {
+                    console.log(`Không tìm thấy: ${kanji}${ext}`);
+                }
+            }
+            
+            if (imageUrl) {
+                const img = document.createElement("img");
+                img.src = imageUrl;
+                img.className = "modal-image";
+                img.alt = kanji;
+                img.onload = () => {
+                    modalImageContainer.innerHTML = "";
+                    modalImageContainer.appendChild(img);
+                };
+                img.onerror = () => {
+                    modalImageContainer.innerHTML = '<div class="error-message">❌ Không thể tải ảnh</div>';
+                };
+            } else {
+                modalImageContainer.innerHTML = `
+                    <div class="error-message">
+                        ❌ Không tìm thấy ảnh cho chữ "${kanji}"<br>
+                        <small>Hãy đảm bảo file ảnh có tên "${kanji}.jpg" trong thư mục images của repo</small>
+                    </div>
+                `;
+            }
+        }
+        
+        // Đóng modal
+        document.querySelector(".close").onclick = function() {
+            document.getElementById("imageModal").style.display = "none";
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById("imageModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+        
+        // Tìm kiếm
+        document.getElementById("searchBox").addEventListener("input", (e) => {
+            displayKanjiList(e.target.value);
+        });
+        
+        // Khởi tạo
+        displayKanjiList();
+        
+        // Thêm keyboard support (ESC để đóng modal)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById("imageModal").style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
