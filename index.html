@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Học Kanji - 2 chữ mỗi dòng</title>
+    <title>Học Kanji - 4 chữ (2x2)</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 800px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -67,61 +67,56 @@
             transform: translateY(0);
         }
         
-        /* Grid hiển thị 2 chữ mỗi dòng */
+        /* Grid hiển thị 2x2: 2 cột, 2 dòng */
         .kanji-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);  /* Chính xác 2 cột */
-            gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
             margin-bottom: 30px;
         }
         
         .kanji-card {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 15px;
-            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 3px solid #e9ecef;
+            border-radius: 20px;
+            padding: 40px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             animation: fadeIn 0.5s;
+            aspect-ratio: 1 / 1;  /* Tạo ô vuông */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: scale(0.9);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: scale(1);
             }
         }
         
         .kanji-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             border-color: #667eea;
             background: white;
         }
         
         .kanji-char {
-            font-size: 64px;
+            font-size: 80px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 15px;
+            transition: color 0.3s;
         }
         
-        .kanji-reading {
-            font-size: 18px;
+        .kanji-card:hover .kanji-char {
             color: #667eea;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        
-        .kanji-meaning {
-            font-size: 16px;
-            color: #666;
-            line-height: 1.4;
         }
         
         /* Stats */
@@ -138,7 +133,7 @@
             font-size: 14px;
         }
         
-        /* Modal popup cho ảnh */
+        /* Modal popup cho ảnh và thông tin */
         .modal {
             display: none;
             position: fixed;
@@ -147,20 +142,21 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.8);
+            background-color: rgba(0,0,0,0.85);
             animation: fadeIn 0.3s;
         }
         
         .modal-content {
             position: relative;
             background-color: white;
-            margin: 5% auto;
-            padding: 20px;
+            margin: 3% auto;
+            padding: 25px;
             width: 90%;
-            max-width: 600px;
-            border-radius: 15px;
+            max-width: 550px;
+            border-radius: 20px;
             text-align: center;
             animation: slideIn 0.3s;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
         
         @keyframes slideIn {
@@ -176,13 +172,14 @@
         
         .close {
             position: absolute;
-            right: 20px;
+            right: 18px;
             top: 10px;
             color: #aaa;
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
+            z-index: 1001;
         }
         
         .close:hover {
@@ -191,9 +188,10 @@
         
         .modal-image {
             max-width: 100%;
-            max-height: 60vh;
-            border-radius: 10px;
-            margin: 20px 0;
+            max-height: 55vh;
+            border-radius: 12px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         .modal-kanji {
@@ -204,24 +202,29 @@
         }
         
         .modal-reading {
-            font-size: 20px;
+            font-size: 22px;
             color: #667eea;
             font-weight: bold;
-            margin: 10px 0;
+            margin: 8px 0;
+            letter-spacing: 1px;
         }
         
         .modal-meaning {
-            font-size: 18px;
-            color: #666;
-            margin: 10px 0;
+            font-size: 20px;
+            color: #2c3e50;
+            font-weight: 500;
+            margin: 10px 0 20px 0;
+            background: #f0f2f5;
+            padding: 12px;
+            border-radius: 10px;
         }
         
         .loading {
             display: inline-block;
             width: 50px;
             height: 50px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -235,28 +238,45 @@
             color: #dc3545;
             padding: 20px;
             font-size: 16px;
+            background: #ffeaea;
+            border-radius: 10px;
+            margin: 10px 0;
         }
         
         /* Responsive cho mobile */
         @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
             .kanji-grid {
-                grid-template-columns: 1fr;  /* Trên mobile: 1 chữ mỗi dòng */
+                gap: 15px;
+            }
+            
+            .kanji-card {
+                padding: 25px 15px;
             }
             
             .kanji-char {
-                font-size: 48px;
+                font-size: 55px;
             }
             
             .modal-content {
                 width: 95%;
                 margin: 10% auto;
+                padding: 20px;
             }
-        }
-        
-        /* Responsive cho tablet */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .kanji-grid {
-                grid-template-columns: repeat(2, 1fr);  /* Giữ 2 cột */
+            
+            .modal-kanji {
+                font-size: 55px;
+            }
+            
+            .modal-reading {
+                font-size: 18px;
+            }
+            
+            .modal-meaning {
+                font-size: 16px;
             }
         }
     </style>
@@ -264,17 +284,17 @@
 <body>
     <div class="container">
         <h1>📚 Học Kanji mỗi ngày</h1>
-        <p class="subtitle">✨ Click vào chữ Hán để xem hình ảnh minh họa</p>
+        <p class="subtitle">✨ Click vào chữ Kanji để xem hình ảnh và ý nghĩa</p>
         
         <div class="button-container">
-            <button class="random-btn" onclick="loadRandomKanji()">🎲 Random 2 chữ mới</button>
+            <button class="random-btn" onclick="loadRandomKanji()">🎲 Random 4 chữ mới</button>
         </div>
         
         <div class="kanji-grid" id="kanjiGrid"></div>
         
         <div class="stats">
             <p>📊 Tổng số chữ Hán: <span id="totalCount">0</span> | 
-            🔄 Mỗi lần random hiển thị <strong>2 chữ</strong> (2 chữ mỗi dòng)</p>
+            🔄 4 chữ (2 dòng × 2 cột) | Click vào chữ để xem chi tiết</p>
         </div>
     </div>
     
@@ -302,8 +322,8 @@
         // Cache ảnh để tránh tải lại nhiều lần
         const imageCache = new Map();
         
-        // Số lượng chữ hiển thị mỗi lần (2 chữ)
-        const DISPLAY_COUNT = 2;
+        // Số lượng chữ hiển thị (4 chữ)
+        const DISPLAY_COUNT = 4;
         
         // Cập nhật tổng số chữ
         document.getElementById("totalCount").textContent = vocabulary.length;
@@ -318,13 +338,13 @@
             return shuffled.slice(0, count);
         }
         
-        // Hiển thị 2 chữ random
+        // Hiển thị 4 chữ random (chỉ hiện Kanji)
         function loadRandomKanji() {
             const randomItems = getRandomItems(vocabulary, DISPLAY_COUNT);
             displayKanjiList(randomItems);
         }
         
-        // Hiển thị danh sách các chữ được chọn
+        // Hiển thị danh sách các chữ (chỉ có Kanji)
         function displayKanjiList(kanjiList) {
             const grid = document.getElementById("kanjiGrid");
             grid.innerHTML = "";
@@ -335,14 +355,12 @@
                 card.onclick = () => showImage(item.kanji);
                 card.innerHTML = `
                     <div class="kanji-char">${item.kanji}</div>
-                    <div class="kanji-reading">${item.meaning || ''}</div>
-                    <div class="kanji-meaning">${item.vietnamese || ''}</div>
                 `;
                 grid.appendChild(card);
             });
         }
         
-        // Hiển thị ảnh trong modal
+        // Hiển thị ảnh + thông tin trong modal
         async function showImage(kanji) {
             const modal = document.getElementById("imageModal");
             const modalKanji = document.getElementById("modalKanji");
@@ -355,8 +373,11 @@
             
             modalKanji.textContent = kanji;
             if (wordData) {
-                modalReading.textContent = wordData.meaning || "";
-                modalMeaning.textContent = wordData.vietnamese || "";
+                modalReading.textContent = wordData.meaning || "Đang cập nhật...";
+                modalMeaning.textContent = wordData.vietnamese || "Đang cập nhật...";
+            } else {
+                modalReading.textContent = "Đang cập nhật...";
+                modalMeaning.textContent = "Đang cập nhật...";
             }
             
             modalImageContainer.innerHTML = '<div class="loading"></div>';
@@ -401,8 +422,7 @@
             } else {
                 modalImageContainer.innerHTML = `
                     <div class="error-message">
-                        ❌ Không tìm thấy ảnh cho chữ "${kanji}"<br>
-                        <small>Hãy đảm bảo file ảnh có tên "${kanji}.jpg" trong thư mục images</small>
+                        ❌ Không tìm thấy ảnh cho chữ "${kanji}"
                     </div>
                 `;
             }
@@ -420,14 +440,14 @@
             }
         }
         
-        // Thêm keyboard support (ESC để đóng modal)
+        // ESC để đóng modal
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 document.getElementById("imageModal").style.display = "none";
             }
         });
         
-        // Khởi tạo: load 2 chữ random khi trang được tải
+        // Khởi tạo: load 4 chữ random khi trang được tải
         window.addEventListener('DOMContentLoaded', () => {
             loadRandomKanji();
         });
