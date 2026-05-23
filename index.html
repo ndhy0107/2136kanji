@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Học Kanji - Click để xem ảnh</title>
+    <title>Học Kanji - Random 4 chữ mỗi ngày</title>
     <style>
         * {
             margin: 0;
@@ -39,40 +39,103 @@
             margin-bottom: 30px;
         }
         
-        /* Grid hiển thị các chữ Hán */
+        /* Button styles */
+        .button-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .random-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .random-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .random-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Grid hiển thị 4 chữ */
         .kanji-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
             margin-bottom: 30px;
         }
         
         .kanji-card {
             background: #f8f9fa;
             border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 25px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .kanji-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             border-color: #667eea;
+            background: white;
         }
         
         .kanji-char {
-            font-size: 48px;
+            font-size: 64px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .kanji-reading {
+            font-size: 18px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 8px;
         }
         
         .kanji-meaning {
-            font-size: 14px;
+            font-size: 16px;
             color: #666;
+            line-height: 1.4;
+        }
+        
+        /* Stats */
+        .stats {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .stats p {
+            color: #666;
+            font-size: 14px;
         }
         
         /* Modal popup cho ảnh */
@@ -86,11 +149,6 @@
             height: 100%;
             background-color: rgba(0,0,0,0.8);
             animation: fadeIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
         
         .modal-content {
@@ -133,15 +191,28 @@
         
         .modal-image {
             max-width: 100%;
-            max-height: 70vh;
+            max-height: 60vh;
             border-radius: 10px;
             margin: 20px 0;
         }
         
         .modal-kanji {
-            font-size: 64px;
+            font-size: 72px;
             font-weight: bold;
             color: #333;
+            margin: 10px 0;
+        }
+        
+        .modal-reading {
+            font-size: 20px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .modal-meaning {
+            font-size: 18px;
+            color: #666;
             margin: 10px 0;
         }
         
@@ -166,28 +237,13 @@
             font-size: 16px;
         }
         
-        .search-box {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        
-        .search-box:focus {
-            border-color: #667eea;
-        }
-        
         @media (max-width: 768px) {
             .kanji-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                grid-template-columns: 1fr;
             }
             
             .kanji-char {
-                font-size: 36px;
+                font-size: 48px;
             }
             
             .modal-content {
@@ -199,12 +255,19 @@
 </head>
 <body>
     <div class="container">
-        <h1>📚 Học Kanji qua hình ảnh</h1>
-        <p class="subtitle">✨ Click vào bất kỳ chữ Hán nào để xem hình ảnh minh họa</p>
+        <h1>📚 Học Kanji mỗi ngày</h1>
+        <p class="subtitle">✨ Click vào chữ Hán để xem hình ảnh minh họa</p>
         
-        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Tìm kiếm chữ Hán...">
+        <div class="button-container">
+            <button class="random-btn" onclick="loadRandomKanji()">🎲 Random 4 chữ mới</button>
+        </div>
         
         <div class="kanji-grid" id="kanjiGrid"></div>
+        
+        <div class="stats">
+            <p>📊 Tổng số chữ Hán: <span id="totalCount">0</span> | 
+            🔄 Mỗi lần random hiển thị 4 chữ ngẫu nhiên</p>
+        </div>
     </div>
     
     <!-- Modal popup -->
@@ -213,6 +276,8 @@
             <span class="close">&times;</span>
             <div id="modalContent">
                 <div class="modal-kanji" id="modalKanji"></div>
+                <div class="modal-reading" id="modalReading"></div>
+                <div class="modal-meaning" id="modalMeaning"></div>
                 <div id="modalImageContainer">
                     <div class="loading"></div>
                 </div>
@@ -220,49 +285,47 @@
         </div>
     </div>
     
+    <script src="data.js"></script>
     <script>
-        // Dữ liệu từ vựng (bạn có thể import từ file Excel đã xuất)
-        // Định dạng: { kanji: "感", meaning: "cảm giác" }
-        const vocabulary = [
-            // THÊM DỮ LIỆU CỦA BẠN VÀO ĐÂY
-            // Ví dụ:
-            { kanji: "感", meaning: "cảm giác" },
-            { kanji: "食", meaning: "ăn" },
-            { kanji: "飲", meaning: "uống" },
-            { kanji: "行", meaning: "đi" },
-            // ... thêm các chữ khác từ file Excel của bạn
-        ];
-        
         // Cấu hình GitHub repo của bạn
-        // THAY ĐỔI URL NÀY THÀNH REPO CỦA BẠN
         const GITHUB_REPO = "https://raw.githubusercontent.com/ndhy0107/2136kanji/main";
-        const IMAGE_FOLDER = "/images"; // Thư mục chứa ảnh trong repo
+        const IMAGE_FOLDER = "/images";
         
         // Cache ảnh để tránh tải lại nhiều lần
         const imageCache = new Map();
         
-        // Hiển thị danh sách chữ Hán
-        function displayKanjiList(searchTerm = "") {
+        // Cập nhật tổng số chữ
+        document.getElementById("totalCount").textContent = vocabulary.length;
+        
+        // Hàm lấy ngẫu nhiên n phần tử từ mảng
+        function getRandomItems(arr, count) {
+            const shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled.slice(0, count);
+        }
+        
+        // Hiển thị 4 chữ random
+        function loadRandomKanji() {
+            const randomItems = getRandomItems(vocabulary, 4);
+            displayKanjiList(randomItems);
+        }
+        
+        // Hiển thị danh sách các chữ được chọn
+        function displayKanjiList(kanjiList) {
             const grid = document.getElementById("kanjiGrid");
             grid.innerHTML = "";
             
-            const filteredVocab = vocabulary.filter(item => 
-                item.kanji.includes(searchTerm) || 
-                item.meaning.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            
-            if (filteredVocab.length === 0) {
-                grid.innerHTML = "<p style='grid-column: 1/-1; text-align: center;'>Không tìm thấy chữ Hán nào</p>";
-                return;
-            }
-            
-            filteredVocab.forEach(item => {
+            kanjiList.forEach(item => {
                 const card = document.createElement("div");
                 card.className = "kanji-card";
                 card.onclick = () => showImage(item.kanji);
                 card.innerHTML = `
                     <div class="kanji-char">${item.kanji}</div>
-                    <div class="kanji-meaning">${item.meaning}</div>
+                    <div class="kanji-reading">${item.meaning || ''}</div>
+                    <div class="kanji-meaning">${item.vietnamese || ''}</div>
                 `;
                 grid.appendChild(card);
             });
@@ -272,26 +335,34 @@
         async function showImage(kanji) {
             const modal = document.getElementById("imageModal");
             const modalKanji = document.getElementById("modalKanji");
+            const modalReading = document.getElementById("modalReading");
+            const modalMeaning = document.getElementById("modalMeaning");
             const modalImageContainer = document.getElementById("modalImageContainer");
             
+            // Tìm từ trong vocabulary để lấy thông tin
+            const wordData = vocabulary.find(item => item.kanji === kanji);
+            
             modalKanji.textContent = kanji;
+            if (wordData) {
+                modalReading.textContent = wordData.meaning || "";
+                modalMeaning.textContent = wordData.vietnamese || "";
+            }
+            
             modalImageContainer.innerHTML = '<div class="loading"></div>';
             modal.style.display = "block";
             
-            // Tìm file ảnh (thử với các định dạng khác nhau)
+            // Tìm file ảnh
             const extensions = ['.jpg', '.png', '.jpeg', '.gif'];
             let imageUrl = null;
             
             for (const ext of extensions) {
-                const url = `${GITHUB_REPO}${IMAGE_FOLDER}/${kanji}${ext}`;
+                const url = `${GITHUB_REPO}${IMAGE_FOLDER}/${encodeURIComponent(kanji)}${ext}`;
                 
-                // Kiểm tra cache
                 if (imageCache.has(url)) {
                     imageUrl = url;
                     break;
                 }
                 
-                // Kiểm tra file có tồn tại không
                 try {
                     const response = await fetch(url, { method: 'HEAD' });
                     if (response.ok) {
@@ -320,7 +391,7 @@
                 modalImageContainer.innerHTML = `
                     <div class="error-message">
                         ❌ Không tìm thấy ảnh cho chữ "${kanji}"<br>
-                        <small>Hãy đảm bảo file ảnh có tên "${kanji}.jpg" trong thư mục images của repo</small>
+                        <small>Hãy đảm bảo file ảnh có tên "${kanji}.jpg" trong thư mục images</small>
                     </div>
                 `;
             }
@@ -338,19 +409,16 @@
             }
         }
         
-        // Tìm kiếm
-        document.getElementById("searchBox").addEventListener("input", (e) => {
-            displayKanjiList(e.target.value);
-        });
-        
-        // Khởi tạo
-        displayKanjiList();
-        
         // Thêm keyboard support (ESC để đóng modal)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 document.getElementById("imageModal").style.display = "none";
             }
+        });
+        
+        // Khởi tạo: load 4 chữ random khi trang được tải
+        window.addEventListener('DOMContentLoaded', () => {
+            loadRandomKanji();
         });
     </script>
 </body>
