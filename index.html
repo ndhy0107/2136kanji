@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Học Kanji - Random 4 chữ mỗi ngày</title>
+    <title>Học Kanji - 2 chữ mỗi dòng</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -67,10 +67,10 @@
             transform: translateY(0);
         }
         
-        /* Grid hiển thị 4 chữ */
+        /* Grid hiển thị 2 chữ mỗi dòng */
         .kanji-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(2, 1fr);  /* Chính xác 2 cột */
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -237,9 +237,10 @@
             font-size: 16px;
         }
         
+        /* Responsive cho mobile */
         @media (max-width: 768px) {
             .kanji-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr;  /* Trên mobile: 1 chữ mỗi dòng */
             }
             
             .kanji-char {
@@ -251,6 +252,13 @@
                 margin: 10% auto;
             }
         }
+        
+        /* Responsive cho tablet */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .kanji-grid {
+                grid-template-columns: repeat(2, 1fr);  /* Giữ 2 cột */
+            }
+        }
     </style>
 </head>
 <body>
@@ -259,14 +267,14 @@
         <p class="subtitle">✨ Click vào chữ Hán để xem hình ảnh minh họa</p>
         
         <div class="button-container">
-            <button class="random-btn" onclick="loadRandomKanji()">🎲 Random 4 chữ mới</button>
+            <button class="random-btn" onclick="loadRandomKanji()">🎲 Random 2 chữ mới</button>
         </div>
         
         <div class="kanji-grid" id="kanjiGrid"></div>
         
         <div class="stats">
             <p>📊 Tổng số chữ Hán: <span id="totalCount">0</span> | 
-            🔄 Mỗi lần random hiển thị 4 chữ ngẫu nhiên</p>
+            🔄 Mỗi lần random hiển thị <strong>2 chữ</strong> (2 chữ mỗi dòng)</p>
         </div>
     </div>
     
@@ -294,6 +302,9 @@
         // Cache ảnh để tránh tải lại nhiều lần
         const imageCache = new Map();
         
+        // Số lượng chữ hiển thị mỗi lần (2 chữ)
+        const DISPLAY_COUNT = 2;
+        
         // Cập nhật tổng số chữ
         document.getElementById("totalCount").textContent = vocabulary.length;
         
@@ -307,9 +318,9 @@
             return shuffled.slice(0, count);
         }
         
-        // Hiển thị 4 chữ random
+        // Hiển thị 2 chữ random
         function loadRandomKanji() {
-            const randomItems = getRandomItems(vocabulary, 4);
+            const randomItems = getRandomItems(vocabulary, DISPLAY_COUNT);
             displayKanjiList(randomItems);
         }
         
@@ -416,7 +427,7 @@
             }
         });
         
-        // Khởi tạo: load 4 chữ random khi trang được tải
+        // Khởi tạo: load 2 chữ random khi trang được tải
         window.addEventListener('DOMContentLoaded', () => {
             loadRandomKanji();
         });
